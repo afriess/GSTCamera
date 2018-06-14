@@ -1,0 +1,44 @@
+Mail from 14.6.2018 Q: Is it allowed to publish converted header  <case:448946>
+------------
+Dear Mr Frieß,
+
+Thank you for your email. 
+Yes, it is allowed to to publish the header file.
+Ja, Sie dürfen den Header veröffentlichen.
+
+
+Yours sincerely
+Mit freundlichen Grüßen
+
+Stefan Geißler
+
+(Es lebe das "ß"!)
+--------------------------------------------------------------------
+The Imaging Source Europe GmbH
+Überseetor 18
+D-28217 Bremen
+Germany
+Tel   *49/421/33591-0
+Fax   *49/421/33591-80
+Registergericht: Amtsgericht Bremen HRB 11 927
+Geschäftsführer: Rolf Bollhorst 
+
+--------------------------------------------------------------------
+> Hello,
+>
+> i have translated parts of the header from IC Imaging Control C DLL to 
+> Freepascal/Lazarus (and maybe Delphi will working). Is it possible to 
+> publish the content of the original header (description) on Github (or 
+> similar). Because more people are interested. THe same can be happend 
+> with the linux headers, because Lazarus is a multiplattform RAD-Tool 
+> (Win, Linux, Mac, Android, ...)
+>
+> The sample is included, but not finished yet. I'm waiting for a positive 
+> answer.
+>
+> regards
+>
+> Andreas Frieß
+>
+>
+>
