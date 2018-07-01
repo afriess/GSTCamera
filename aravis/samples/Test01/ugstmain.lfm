@@ -1,0 +1,29 @@
+object Form1: TForm1
+  Left = 928
+  Height = 400
+  Top = 31
+  Width = 471
+  Caption = 'Form1'
+  ClientHeight = 400
+  ClientWidth = 471
+  object Button1: TButton
+    Left = 24
+    Height = 25
+    Top = 16
+    Width = 75
+    Caption = 'Button1'
+    OnClick = Button1Click
+    TabOrder = 0
+  end
+  object Memo1: TMemo
+    Left = 24
+    Height = 330
+    Top = 56
+    Width = 432
+    Lines.Strings = (
+      'Memo1'
+    )
+    ScrollBars = ssVertical
+    TabOrder = 1
+  end
+end
