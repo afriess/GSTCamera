@@ -94,7 +94,6 @@ var
   aGST_version                : T_gst_version;
   aGST_version_string         : T_gst_version_string;
 
-
 function libGST_dll_get_proc_addr(var addr: Pointer; const name: PAnsiChar): Boolean;
 begin
   addr := GetProcedureAddress(libGST_handle, name);
