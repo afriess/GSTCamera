@@ -15,20 +15,22 @@ type
   TForm1 = class(TForm)
     Button1: TButton;
     Button2: TButton;
-    Button3: TButton;
+    BuStartSimple: TButton;
     Button4: TButton;
     Button5: TButton;
     Button6: TButton;
+    Button7: TButton;
     Memo1: TMemo;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
+    procedure BuStartSimpleClick(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
     procedure Button6Click(Sender: TObject);
+    procedure Button7Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
-    pipeline: pointer;
+    videosrc, pipeline: pointer;
     FOnLog: TLogEvent;
     procedure DoLog(Sender: TObject; strLog: String);
   public
@@ -57,10 +59,11 @@ var
   old_state, new_state: TGstElementState;
   MsgStr:               String;
   i:                    Integer;
-  name:                 Pgchar;
+  name:                 string;
   typename:             PgChar;
   _type:                TGType;
   GSTObj:               TForm1;
+  pduration:             pgint64;
 begin
   Result := False;
 
@@ -73,16 +76,17 @@ begin
   GSTObj := user_data;
 
   //MsgStr:= '';
-  MsgStr:= 'MsgType:'+IntToHex(msg^._type,8) + ' ';
-  //MsgStr:= MsgStr+ 'timestp:'+IntToHex(msg^.timestamp,16) + ':';
+  //MsgStr:= 'MsgType:'+IntToHex(msg^._type,8) + ' ';
+  //MsgStr:= 'timestp:'+IntToHex(msg^.timestamp,16) + ':';
+  MsgStr:= 'Seq:'+IntToHex(msg^.seqnum,16) + ':';
 
-  //TForm1(GSTObj).DoLog(nil,MsgStr);
+  //GSTObj.DoLog(nil,MsgStr);
   case msg^._type of
     GST_MESSAGE_STATE_CHANGED:
       begin
         gst_message_parse_state_changed(msg, @old_state, @new_state, nil);
-        MsgStr := MsgStr +'State: ' + String(gst_element_state_get_name(old_state))
-          + ' - ' + String(gst_element_state_get_name(new_state));
+        MsgStr := MsgStr +'State: ' + gst_element_state_get_name(old_state)
+          + ' -> ' + gst_element_state_get_name(new_state);
         if Assigned(GSTObj) and Assigned(GSTObj.OnLog) then
           GSTObj.OnLog(GSTObj, MsgStr);
       end;
@@ -108,18 +112,17 @@ begin
       structure := gst_message_get_structure(msg);
       if (structure <> nil) then
       begin
-        MsgStr := MsgStr +'Msg: ' + String(gst_message_type_get_name(msg^._type)) + ' - ' +
-          String(gst_structure_get_name(structure));
+        MsgStr := MsgStr +'Msg: ' + gst_message_type_get_name(msg^._type) + ' - ' +
+          gst_structure_get_name(structure);
         for i := 0 to gst_structure_n_fields(structure) - 1 do
         begin
           if (i <> 0) then
             MsgStr := MsgStr + ', ';
           name := gst_structure_nth_field_name(structure, i);
-          _type := gst_structure_get_field_type(structure, name);
+          _type := gst_structure_get_field_type(structure, @name[1]);
           MsgStr := MsgStr + ' ' + String(name);
           try
             if _Type <= $7FFFFFFF then begin
-            //if _Type < G_TYPE_FUNDAMENTAL_MAX then begin
               typename:= g_type_name(_type);
               MsgStr := MsgStr + ' ' + String(typename)
             end
@@ -151,7 +154,7 @@ end;
 procedure TForm1.Button1Click(Sender: TObject);
 var
   devstr: string;
-  videosrc,p1,p2,p3,sink, cur_bus: Pointer;
+  p1,p2,p3,sink, cur_bus: Pointer;
   cur_bus_watch_id : LongWord;
 begin
   //
@@ -205,20 +208,17 @@ begin
   end;
 
   sink :=  gst_element_factory_make('autovideosink', 'videosink');
-//gst_ele
   //gst_bin_add_many_5(pipeline, videosrc, p1, p2, p3, sink, nil);
   if not gst_bin_add(pipeline,videosrc) then DoLog(nil,'videosrc not added');
   if not gst_bin_add(pipeline,p2) then DoLog(nil,'p2 not added');
   if not gst_bin_add(pipeline,p3) then DoLog(nil,'p3 not added');
   if not gst_bin_add(pipeline,sink) then DoLog(nil,'sink not added');
 
-
-  //gst_bin_add_many_4(pipeline, videosrc, p2, p3, sink, nil);
+  //gst_element_link_many_4(videosrc, p2, p3, sink, nil);
 
   if not gst_element_link(videosrc, p2) then
   begin
     Memo1.Append('videosrc<->p2');
-    //exit;
   end;
   //if not gst_element_link(p1, p2) then
   //begin
@@ -237,13 +237,12 @@ begin
   end;
 
   // we add a message handler
-  //cur_bus := gst_pipeline_get_bus(pipeline);
-  //cur_bus_watch_id := gst_bus_add_watch(cur_bus, @cb_bus_call, Self);
-  //gst_object_unref(cur_bus);
+  cur_bus := gst_pipeline_get_bus(pipeline);
+  cur_bus_watch_id := gst_bus_add_watch(cur_bus, @cb_bus_call, Self);
+  gst_object_unref(cur_bus);
 
   // Start
-  DoLog(nil,'Pipelinestate (should be 4): '+IntToHex(gst_element_set_state(pipeline, GST_STATE_PLAYING),8));
-  //gst_element_set_state(pipeline, GST_STATE_PLAYING);
+  DoLog(nil,'Pipelinestate (should be 2): '+IntToHex(gst_element_set_state(pipeline, GST_STATE_PLAYING),8));
   DoLog(nil,'started');
 
 end;
@@ -258,7 +257,7 @@ begin
   DoLog(nil,'stopped');
 end;
 
-procedure TForm1.Button3Click(Sender: TObject);
+procedure TForm1.BuStartSimpleClick(Sender: TObject);
 var
   GError:               PGError;
   cur_bus: Pointer;
@@ -274,8 +273,8 @@ begin
 
   //pipeline := gst_parse_launch('v4l2src device=/dev/video0 ! identity silent=false ! videoconvert ! xvimagesink',GError);
   //pipeline := gst_parse_launch('v4l2src device=/dev/video0 ! identity silent=false ! jpegenc ! filesink location=/tmp/test.jpg',GError);
-  //pipeline := gst_parse_launch('playbin uri=https://www.freedesktop.org/software/gstreamer-sdk/data/media/sintel_trailer-480p.webm',GError);
-  pipeline := gst_parse_launch('fakesrc silent=false num-buffers=3 ! identity silent=false ! videoconvert ! xvimagesink',GError);
+  pipeline := gst_parse_launch('playbin uri=https://www.freedesktop.org/software/gstreamer-sdk/data/media/sintel_trailer-480p.webm ! identity silent=false ',GError);
+  //pipeline := gst_parse_launch('fakesrc silent=false num-buffers=3 ! identity silent=false ! videoconvert ! xvimagesink',GError);
 
   if not Assigned(pipeline) then
   begin
@@ -311,6 +310,25 @@ end;
 procedure TForm1.Button6Click(Sender: TObject);
 begin
   DoLog(nil,'Pipelinestate Pause: '+IntToHex(gst_element_set_state(pipeline, GST_STATE_PAUSED),8));
+end;
+
+procedure TForm1.Button7Click(Sender: TObject);
+var
+  duration,position : gint64;
+  pdur : Pgint64;
+  format : DWord;
+begin
+  format:= GST_FORMAT_TIME;
+  duration:=0;
+  position:=0;
+  if gst_element_query_duration(pipeline,format, duration) then
+    Memo1.Append('Duration ' + IntToStr(duration div 100000))
+   else
+    Memo1.Append('Duration  NoDur ');
+  if gst_element_query_position(pipeline,format, position) then
+    Memo1.Append('Position ' + IntToStr(position div 100000))
+  else
+    Memo1.Append('Position  NoPos ');
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);

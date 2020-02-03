@@ -54,37 +54,51 @@ const
   GST_STATE_PAUSED       = 3;
   GST_STATE_PLAYING      = 4;
 
+  (* gstformat.h
+  * GstFormat:
+  * @GST_FORMAT_UNDEFINED: undefined format
+  * @GST_FORMAT_DEFAULT: the default format of the pad/element. This can be
+  *    samples for raw audio, frames/fields for raw video (some, but not all,
+  *    elements support this; use @GST_FORMAT_TIME if you don't have a good
+  *    reason to query for samples/frames)
+  * @GST_FORMAT_BYTES: bytes
+  * @GST_FORMAT_TIME: time in nanoseconds
+  * @GST_FORMAT_BUFFERS: buffers (few, if any, elements implement this as of
+  *     May 2009)
+  * @GST_FORMAT_PERCENT: percentage of stream (few, if any, elements implement
+  *     this as of May 2009)
+  *
+  * Standard predefined formats
+  *)
+type
+  GstFormat = DWord;
+const
+  GST_FORMAT_UNDEFINED  =  0;
+  GST_FORMAT_DEFAULT    =  1;
+  GST_FORMAT_BYTES      =  2;
+  GST_FORMAT_TIME       =  3;
+  GST_FORMAT_BUFFERS    =  4;
+  GST_FORMAT_PERCENT    =  5;
 
 
 (* gstminiobject.h from gstreamer 1.x tranlastion *)
   // see https://github.com/GStreamer/gstreamer/blob/master/gst/gstminiobject.h
 type
 
-  {**
-   * GstMiniObject: (ref-func gst_mini_object_ref) (unref-func gst_mini_object_unref) (set-value-func g_value_set_boxed) (get-value-func g_value_get_boxed)
-   * @type: the GType of the object
-   * @refcount: atomic refcount
-   * @lockstate: atomic state of the locks
-   * @flags: extra flags.
-   * @copy: a copy function
-   * @dispose: a dispose function
-   * @free: the free function
-   *
-   * Base class for refcounted lightweight objects. }
   PGstMiniObject = ^GstMiniObject;
-  GstMiniObject = record
+  GstMiniObject = record   // NOT PACKED !!!
     _type: GType;
     (*< public >*/ /* with COW *)
-    refcount: gint;
-    lockstate: gint;
-    flags : guint;
+    refcount      : gint;
+    lockstate     : gint;
+    flags         : guint;
     _gst_reserved1: gpointer; //GstMiniObjectCopyFunction copy;
     _gst_reserved2: gpointer; //GstMiniObjectDisposeFunction dispose;
     _gst_reserved3: gpointer; //GstMiniObjectFreeFunction free;
     (* < private > */
     /* Used to keep track of parents, weak ref notifies and qdata *)
-    n_qdata : guint;
-    qdata : gpointer;
+    priv_n_qdata : guint;
+    priv_qdata   : gpointer;
   end;
 
   TGType = gsize;     { TODO -oAndi : correct size DWord or QWord ? }
@@ -261,18 +275,17 @@ type
  *}
 
   PGstMessage = ^GstMessage;
-  GstMessage = packed record
+  GstMessage = record
     MiniObject: GstMiniObject;
-    dummy1:pointer;
     (*< public > *//* with COW *)
-    _type: guint;
-    dummy2:guint;
-    timestamp: guint64;
-    src : gpointer;
-    seqnum: guint32;
+    _type     : guint;
+    dummy     : guint;
+    timestamp : guint64;
+    src       : gpointer;
+    seqnum    : guint32;
     (*< private >*//* with MESSAGE_LOCK *)
-    lock : gpointer;                 (* lock and cond for async delivery *)
-    cond :  gpointer;
+    priv_lock : gpointer;                 (* lock and cond for async delivery *)
+    Priv_cond :  gpointer;
   end;
 
   T_gst_bus_func = function(bus: pointer; msg: PGSTmessage; user_data: pointer): Boolean;
@@ -318,10 +331,13 @@ type
    GstElement*     gst_pipeline_new                (const gchar *name) G_GNUC_MALLOC;}
   function gst_pipeline_new(const name: Pgchar): PGstElement;
   function gst_element_factory_make(const factoryname: Pgchar; const name: Pgchar): PGstElement;
-  function gst_bin_add(bin: PGstElement; element: PGstElement): Boolean;
-  procedure gst_bin_add_many_4(bin: PGstElement; element_1: PGstElement; element_2: PGstElement; element_3: PGstElement; element_4: PGstElement; additional: PGstElement);
-  procedure gst_bin_add_many_5(bin: PGstElement; element_1: PGstElement; element_2: PGstElement; element_3: PGstElement; element_4: PGstElement; element_5: PGstElement; additional: PGstElement);
+
+  function gst_bin_add(element_1: PGstElement; element_2: PGstElement): Boolean;
+  procedure gst_bin_add_many(element_1: PGstElement; element_2: PGstElement; additional: PGstElement);
+
   function gst_element_link(src: PGstElement; dest: PGstElement): Boolean;
+  procedure gst_element_link_many_4(element_1: PGstElement; element_2: PGstElement; element_3: PGstElement; element_4: PGstElement; additional: PGstElement);
+  procedure gst_element_link_many_5(element_1: PGstElement; element_2: PGstElement; element_3: PGstElement; element_4: PGstElement; element_5: PGstElement; additional: PGstElement);
   function gst_pipeline_get_bus(pipeline: PGstElement): pointer;
   function gst_bus_add_watch(bus: PGstElement; func: T_gst_bus_func; user_data: pointer): DWord;
   function gst_object_unref(obj: PGstElement): DWord;
@@ -329,18 +345,20 @@ type
 
   {gstmessage.h}
   {const GstStructure * gst_message_get_structure       (GstMessage *message);}
-  function gst_message_get_structure(message:PGstMessage): PGstStructure;
-
+  function  gst_message_get_structure(message:PGstMessage): PGstStructure;
   procedure gst_message_parse_state_changed(message: PGSTmessage; oldstate: PGstElementState; newstate: PGstElementState; pending: PGstElementState);
   procedure gst_message_parse_error(msg: PGSTmessage; var GError: PGError; var debug: Pgchar);
+  function  gst_message_type_get_name(_type: TGstMessageType): string;
 
-  function gst_message_type_get_name(_type: TGstMessageType): Pgchar;
 
-  function gst_element_state_get_name(state: GstElementState): Pgchar;
+  function gst_element_state_get_name(state: GstElementState): string;
 
-  function gst_structure_get_name(structure: PGstStructure): Pgchar;
+  function gst_element_query_duration(element: PGstElement;format: GstFormat;var duration: gint64):boolean;
+  function gst_element_query_position(element: PGstElement;format: GstFormat;var position: gint64):boolean;
+
+  function gst_structure_get_name(structure: PGstStructure): string;
   function gst_structure_n_fields(structure: PGstStructure): gint;
-  function gst_structure_nth_field_name(structure: PGstStructure; index: guint): Pgchar;
+  function gst_structure_nth_field_name(structure: PGstStructure; index: guint): string;
   function gst_structure_get_field_type(structure: PGstStructure; fieldname: Pgchar): GType;
 
 
@@ -371,11 +389,15 @@ Type
 
   T_gst_parse_launch = function(pipeline_description: Pgchar; var GError: PGError):pointer;
   T_gst_pipeline_new = function(const pipelinename: Pgchar): pointer; cdecl;
-  T_gst_element_factory_make = function(const factoryname: Pgchar; const name: Pgchar): pointer; cdecl;
+
   T_gst_bin_add = function(bin: pointer; element: pointer): Boolean; cdecl;
-  T_gst_bin_add_many_4 = procedure(bin: pointer; element_1: pointer; element_2: pointer; element_3: pointer; element_4: pointer; additional: pointer); cdecl;
-  T_gst_bin_add_many_5 = procedure(bin: pointer; element_1: pointer; element_2: pointer; element_3: pointer; element_4: pointer; element_5: pointer; additional: pointer); cdecl;
+  T_gst_bin_add_many = procedure(bin: pointer; element: pointer; additional: pointer); cdecl;
+
   T_gst_element_link = function(src: pointer; dest: pointer): Boolean; cdecl;
+  T_gst_element_factory_make = function(const factoryname: Pgchar; const name: Pgchar): pointer; cdecl;
+  T_gst_element_link_many = function(element_1: pointer; element_2: pointer): Boolean; cdecl;
+  T_gst_element_link_many_4 = procedure(element_1: pointer; element_2: pointer; element_3: pointer; element_4: pointer; additional: pointer); cdecl;
+  T_gst_element_link_many_5 = procedure(element_1: pointer; element_2: pointer; element_3: pointer; element_4: pointer; element_5: pointer; additional: pointer); cdecl;
   T_gst_pipeline_get_bus = function(pipeline: pointer): pointer; cdecl;
   T_gst_bus_add_watch = function(bus: pointer; func: T_gst_bus_func; user_data: pointer): DWord; cdecl;
   T_gst_object_unref = function(obj: pointer): DWord; cdecl;
@@ -391,6 +413,8 @@ Type
   T_gst_message_type_get_name = function(_type: TGstMessageType): Pgchar; cdecl;
 
   T_gst_element_state_get_name = function(state: TGstElementState): Pgchar; cdecl;
+  T_gst_element_query_duration = function(element: PGstElement;format: GstFormat; var duration: gint64):gboolean;
+  T_gst_element_query_position = function(element: PGstElement;format: GstFormat; var position: gint64):gboolean;
 
   T_gst_structure_get_name = function(structure: PGstStructure): Pgchar; cdecl;
   T_gst_structure_n_fields = function(structure: PGstStructure): gint; cdecl;
@@ -414,17 +438,21 @@ var
 
 
   aGST_parse_launch          : T_gst_parse_launch;
+  aGST_object_unref          : T_gst_object_unref;
+
   aGST_pipeline_new          : T_gst_pipeline_new;
-  aGST_element_factory_make  : T_gst_element_factory_make;
-  aGST_bin_add               : T_gst_bin_add;
-  aGST_bin_add_many_4        : T_gst_bin_add_many_4;
-  aGST_bin_add_many_5        : T_gst_bin_add_many_5;
-  aGST_element_link          : T_gst_element_link;
   aGST_pipeline_get_bus      : T_gst_pipeline_get_bus;
   aGST_bus_add_watch         : T_gst_bus_add_watch;
-  aGST_object_unref          : T_gst_object_unref;
-  aGST_element_set_state     : T_gst_element_set_state;
 
+  aGST_bin_add               : T_gst_bin_add;
+  aGST_bin_add_many          : T_gst_bin_add_many;
+
+  aGST_element_set_state     : T_gst_element_set_state;
+  aGST_element_factory_make  : T_gst_element_factory_make;
+  aGST_element_link_many     : T_gst_element_link_many;
+  aGST_element_link_many_4   : T_gst_element_link_many_4;
+  aGST_element_link_many_5   : T_gst_element_link_many_5;
+  aGST_element_link          : T_gst_element_link;
 
   // gst_message
   aGST_message_get_structure  : T_gst_message_get_structure;
@@ -433,17 +461,15 @@ var
   aGST_message_type_get_name : T_gst_message_type_get_name;
 
   aGST_element_state_get_name :  T_gst_element_state_get_name;
+  aGST_element_query_duration : T_gst_element_query_duration;
+  aGST_element_query_position : T_gst_element_query_position;
 
   aGST_structure_get_name :  T_gst_structure_get_name;
   aGST_structure_n_fields : T_gst_structure_n_fields;
   aGST_structure_nth_field_name : T_gst_structure_nth_field_name;
   aGST_structure_get_field_type : T_gst_structure_get_field_type;
 
-  //aG_type_name : T_g_type_name;
-
-
-  // gst miniobject
-
+//
 
 function libGST_dll_get_proc_addr(var addr: Pointer; const name: PAnsiChar): Boolean;
 begin
@@ -482,22 +508,30 @@ begin
 
 
   // gst div
-
   if not libGST_dll_get_proc_addr(pointer(aGST_parse_launch), 'gst_parse_launch') then inc(ErrCnt);
+  if not libGST_dll_get_proc_addr(pointer(aGST_object_unref), 'gst_object_unref') then inc(ErrCnt);
+
+  // pipeline
   if not libGST_dll_get_proc_addr(pointer(aGST_pipeline_new), 'gst_pipeline_new') then inc(ErrCnt);
-  if not libGST_dll_get_proc_addr(pointer(aGST_element_factory_make), 'gst_element_factory_make') then inc(ErrCnt);
-  if not libGST_dll_get_proc_addr(pointer(aGST_bin_add), 'gst_element_link_many') then inc(ErrCnt);
-  if not libGST_dll_get_proc_addr(pointer(aGST_bin_add_many_4), 'gst_element_link_many') then inc(ErrCnt);
-  if not libGST_dll_get_proc_addr(pointer(aGST_bin_add_many_5), 'gst_element_link_many') then inc(ErrCnt);
-  if not libGST_dll_get_proc_addr(pointer(aGST_element_link), 'gst_element_link') then inc(ErrCnt);
   if not libGST_dll_get_proc_addr(pointer(aGST_pipeline_get_bus), 'gst_pipeline_get_bus') then inc(ErrCnt);
   if not libGST_dll_get_proc_addr(pointer(aGST_bus_add_watch), 'gst_bus_add_watch') then inc(ErrCnt);
-  if not libGST_dll_get_proc_addr(pointer(aGST_object_unref), 'gst_object_unref') then inc(ErrCnt);
+
+  //
+  if not libGST_dll_get_proc_addr(pointer(aGST_bin_add), 'gst_bin_add') then inc(ErrCnt);
+  if not libGST_dll_get_proc_addr(pointer(aGST_bin_add_many), 'gst_bin_add_many') then inc(ErrCnt);
+
+  // element
+  if not libGST_dll_get_proc_addr(pointer(aGST_element_factory_make), 'gst_element_factory_make') then inc(ErrCnt);
+  if not libGST_dll_get_proc_addr(pointer(aGST_element_link_many), 'gst_element_link_many') then inc(ErrCnt);
+  if not libGST_dll_get_proc_addr(pointer(aGST_element_link_many_4), 'gst_element_link_many') then inc(ErrCnt);
+  if not libGST_dll_get_proc_addr(pointer(aGST_element_link_many_5), 'gst_element_link_many') then inc(ErrCnt);
+  if not libGST_dll_get_proc_addr(pointer(aGST_element_link), 'gst_element_link') then inc(ErrCnt);
   if not libGST_dll_get_proc_addr(pointer(aGST_element_set_state), 'gst_element_set_state') then inc(ErrCnt);
-
-
+  if not libGST_dll_get_proc_addr(pointer(aGST_element_query_duration), 'gst_element_query_duration') then inc(ErrCnt);
+  if not libGST_dll_get_proc_addr(pointer(aGST_element_query_position), 'gst_element_query_position') then inc(ErrCnt);
   if not libGST_dll_get_proc_addr(pointer(aGST_element_state_get_name), 'gst_element_state_get_name') then inc(ErrCnt);
 
+  // structure
   if not libGST_dll_get_proc_addr(pointer(aGST_structure_get_name), 'gst_structure_get_name') then inc(ErrCnt);
   if not libGST_dll_get_proc_addr(pointer(aGST_structure_n_fields), 'gst_structure_n_fields') then inc(ErrCnt);
   if not libGST_dll_get_proc_addr(pointer(aGST_structure_nth_field_name), 'gst_structure_nth_field_name') then inc(ErrCnt);
@@ -594,25 +628,43 @@ begin
     aGST_message_parse_error(msg, GError, debug);
 end;
 
-function gst_message_type_get_name(_type: TGstMessageType): Pgchar;
+
+function gst_message_type_get_name(_type: TGstMessageType): string;
 begin
-  Result := Nil;
+  Result := '';
   if (addr(aGST_message_type_get_name) <> nil) then
-    Result := aGST_message_type_get_name(_type);
+    Result := string(aGST_message_type_get_name(_type));
 end;
 
-function gst_element_state_get_name(state: GstElementState): Pgchar;
+
+function gst_element_state_get_name(state: GstElementState): string;
 begin
-  Result := Nil;
+  Result := '';
   if (addr(aGST_element_state_get_name) <> nil) then
-    Result := aGST_element_state_get_name(state);
+    Result := string(aGST_element_state_get_name(state));
 end;
 
-function gst_structure_get_name(structure: PGstStructure): Pgchar;
+function gst_element_query_duration(element: PGstElement; format: GstFormat;
+  var duration: gint64): boolean;
 begin
-  Result := Nil;
+  Result := false;
+  if (addr(aGST_element_query_duration) <> nil) then
+    Result := aGST_element_query_duration(element,format,duration);
+end;
+
+function gst_element_query_position(element: PGstElement; format: GstFormat;
+  var position: gint64): boolean;
+begin
+  Result := false;
+  if (addr(aGST_element_query_position) <> nil) then
+    Result := aGST_element_query_position(element,format,position);
+end;
+
+function gst_structure_get_name(structure: PGstStructure): string;
+begin
+  Result := '';
   if (addr(aGST_structure_get_name) <> nil) then
-    Result := aGST_structure_get_name(structure);
+    Result := string(aGST_structure_get_name(structure));
 end;
 
 function gst_structure_n_fields(structure: PGstStructure): gint;
@@ -623,11 +675,11 @@ begin
 end;
 
 function gst_structure_nth_field_name(structure: PGstStructure; index: guint
-  ): Pgchar;
+  ): string;
 begin
-  Result := Nil;
+  Result := '';
   if (addr(aGST_structure_nth_field_name) <> nil) then
-    Result := aGST_structure_nth_field_name(structure, index);
+    Result := string(aGST_structure_nth_field_name(structure, index));
 end;
 
 function gst_structure_get_field_type(structure: PGstStructure;
@@ -667,27 +719,34 @@ begin
     Result := aGST_element_factory_make(factoryname, name);
 end;
 
-function gst_bin_add(bin: PGstElement; element: PGstElement): Boolean;
+function gst_bin_add(element_1: PGstElement; element_2: PGstElement): Boolean;
 begin
   Result:= false;
   if (addr(aGST_bin_add) <> nil) then
-    Result := aGST_bin_add(bin, element);
+    Result := aGST_bin_add(element_1, element_2);
 end;
 
-procedure gst_bin_add_many_4(bin: PGstElement; element_1: PGstElement;
+procedure gst_bin_add_many(element_1: PGstElement; element_2: PGstElement;
+  additional: PGstElement);
+begin
+  if (addr(aGST_bin_add_many) <> nil) then
+    aGST_bin_add_many(element_1, element_2, additional);
+end;
+
+procedure gst_element_link_many_4(element_1: PGstElement;
   element_2: PGstElement; element_3: PGstElement; element_4: PGstElement;
   additional: PGstElement);
 begin
-  if (addr(aGST_bin_add_many_4) <> nil) then
-    aGST_bin_add_many_4(bin, element_1, element_2, element_3, element_4, additional);
+  if (addr(aGST_element_link_many_4) <> nil) then
+    aGST_element_link_many_4(element_1, element_2, element_3, element_4, additional);
 end;
 
-procedure gst_bin_add_many_5(bin: PGstElement; element_1: PGstElement;
+procedure gst_element_link_many_5(element_1: PGstElement;
   element_2: PGstElement; element_3: PGstElement; element_4: PGstElement;
   element_5: PGstElement; additional: PGstElement);
 begin
-  if (addr(aGST_bin_add_many_5) <> nil) then
-    aGST_bin_add_many_5(bin, element_1, element_2, element_3, element_4, element_5, additional);
+  if (addr(aGST_element_link_many_5) <> nil) then
+    aGST_element_link_many_5(element_1, element_2, element_3, element_4, element_5,additional);
 end;
 
 function gst_element_link(src: PGstElement; dest: PGstElement): Boolean;
