@@ -482,6 +482,7 @@ end;
 function libGST_dynamic_dll_init(currLib:string):boolean;
 var
   ErrCnt : integer;
+  FN2: string;
 begin
   Result := false;
   ErrCnt := 0;
@@ -489,6 +490,17 @@ begin
   // check if handle is not allocatet
   if (libGST_handle <> dynlibs.NilHandle) then exit;
   libGST_handle := DynLibs.LoadLibrary(currLib);
+  {$IfDef WINDOWS}
+  // the the version with windows it is possible the leading 'lib' is missing
+  //   it depends on the installed version of gstreamer
+  //   compiled with minGW it has the 'lib'
+  //   compiled with MSVC the 'lib' at the beginning of the filename is missing
+  if (libGST_handle = dynlibs.NilHandle) then
+  begin
+    FN2 := RightStr(currLib,length(currLib)-3);
+    libGST_handle := DynLibs.LoadLibrary(FN2);
+  end;
+  {$endif}
   // if handle not allocated well, then exit
   if (libGST_handle = dynlibs.NilHandle) then
   begin

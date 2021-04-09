@@ -340,6 +340,7 @@ begin
   if not gstlib_initdll('') then begin
     ShowMessage('Error in init dll ' + #13+ #13+ gstlib_GetInitError);
     DoLog(nil,'Error in init dll ' + #13+ #13+ gstlib_GetInitError);
+    exit;
   end;
   argc:=0;
   argv:=PAnsiChar('');
