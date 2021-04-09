@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectGroup FileVersion="1">
+    <Targets Count="2">
+      <Target0 FileName="deBayerTestV01\Testbayer.lpi">
+        <BuildModes Count="3"/>
+        <Mode1 Name="Debug"/>
+        <Mode2 Name="Release"/>
+        <Mode3 Name="DebugLinuxX64"/>
+      </Target0>
+      <Target1 FileName="deBayerTestV02\TestbayerV02.lpi">
+        <BuildModes Count="2"/>
+        <Mode1 Name="DebugWini386" Compile="True"/>
+        <Mode2 Name="DebugLinuxX64"/>
+      </Target1>
+    </Targets>
+  </ProjectGroup>
+</CONFIG>

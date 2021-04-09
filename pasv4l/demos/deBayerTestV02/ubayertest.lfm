@@ -1,0 +1,28 @@
+object Form1: TForm1
+  Left = 2170
+  Height = 522
+  Top = 250
+  Width = 786
+  Caption = 'Form1'
+  ClientHeight = 522
+  ClientWidth = 786
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poDefault
+  object Button1: TButton
+    Left = 616
+    Height = 25
+    Top = 8
+    Width = 75
+    Caption = 'Button1'
+    OnClick = Button1Click
+    TabOrder = 0
+  end
+  object PaintBox: TPaintBox
+    Left = 0
+    Height = 522
+    Top = 0
+    Width = 786
+    Align = alClient
+  end
+end

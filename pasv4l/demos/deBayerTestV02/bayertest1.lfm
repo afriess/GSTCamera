@@ -1,0 +1,51 @@
+object FormWinni: TFormWinni
+  Left = 0
+  Height = 950
+  Top = 0
+  Width = 1272
+  Caption = 'FormWinni'
+  ClientHeight = 950
+  ClientWidth = 1272
+  LCLVersion = '2.0.13.0'
+  object Button1: TButton
+    Left = 16
+    Height = 25
+    Top = 912
+    Width = 75
+    Caption = 'Load'
+    OnClick = Button1Click
+    TabOrder = 0
+  end
+  object Button2: TButton
+    Left = 145
+    Height = 25
+    Top = 913
+    Width = 119
+    Caption = 'Create Image'
+    OnClick = Button2Click
+    TabOrder = 1
+  end
+  object Label1: TLabel
+    Left = 312
+    Height = 14
+    Top = 920
+    Width = 19
+    Caption = '0%'
+    ParentColor = False
+  end
+  object Image1: TImage
+    Left = 0
+    Height = 842
+    Top = 0
+    Width = 1280
+  end
+  object Button3: TButton
+    Left = 1176
+    Height = 25
+    Top = 920
+    Width = 75
+    Caption = 'Exit'
+    OnClick = Button3Click
+    TabOrder = 2
+  end
+end
