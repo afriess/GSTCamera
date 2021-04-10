@@ -37,15 +37,15 @@ function icvBayer2BGR_8u_C1C3R(
      blue,
      start_with_green:cint):cvstatus;
 const
-  {$IFDEF Windows}
-  // Windows uses BGR = 3 Bytes per pixel in Bitmap
-  rgb_step= 3;
-  rgba_corr= 0;
-  {$ELSE}
+  //{$IFDEF Windows}
+  //// Windows uses BGR = 3 Bytes per pixel in Bitmap
+  //rgb_step= 3;
+  //rgba_corr= 0;
+  //{$ELSE}
   // Linux uses BGRA = 4 Bytes per pixel in Bitmap
   rgb_step= 4;
   rgba_corr= 1;
-  {$ENDIF}
+  //{$ENDIF}
 var
     t0,t1 :cint;
     bayer_end,
@@ -60,8 +60,8 @@ begin
   // heighth of picture minus one * size of one line
   start:= (size.height - 1)*dst_step;
   //
-  fillchar( dst0^, cnt, #0);
-  fillchar( (dst0 + start)^, cnt ,#0 );
+  //fillchar( dst0^, cnt, #0);
+  //fillchar( (dst0 + start)^, cnt ,#0 );
 //    memset( dst0, 0, size.width*3*sizeof(dst0[0]) );
 //    memset( dst0 + (size.height - 1)*dst_step, 0, size.width*3*sizeof(dst0[0]) );
   inc(dst0 ,dst_step + rgb_step + 1);
@@ -201,7 +201,7 @@ var
 begin
   x.width:=w;
   x.height:=h;
-  wx:= w * 4;  // 4 * for RGB Linux
+  wx:= w * 4;  // 4 * for RGBA Linux
   res := icvBayer2BGR_8u_C1C3R(src,w ,dest, wx ,x,-1,0);
 end;
 
