@@ -1,0 +1,92 @@
+object Form1: TForm1
+  Left = 348
+  Height = 602
+  Top = 32
+  Width = 984
+  Caption = 'Form1'
+  ClientHeight = 602
+  ClientWidth = 984
+  DesignTimePPI = 120
+  OnCreate = FormCreate
+  object ScrollBox1: TScrollBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Panel1
+    Left = 0
+    Height = 528
+    Top = 0
+    Width = 984
+    HorzScrollBar.Page = 131
+    VertScrollBar.Page = 131
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ClientHeight = 524
+    ClientWidth = 980
+    TabOrder = 0
+    object PaintBox: TPaintBox
+      AnchorSideLeft.Control = ScrollBox1
+      AnchorSideTop.Control = ScrollBox1
+      AnchorSideRight.Control = ScrollBox1
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = ScrollBox1
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 524
+      Top = 0
+      Width = 980
+      Anchors = [akTop, akLeft, akRight, akBottom]
+    end
+  end
+  object Panel1: TPanel
+    AnchorSideLeft.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 0
+    Height = 74
+    Top = 528
+    Width = 984
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ClientHeight = 74
+    ClientWidth = 984
+    TabOrder = 1
+    object BuStart: TButton
+      Left = 24
+      Height = 31
+      Top = 24
+      Width = 94
+      Caption = 'Start'
+      OnClick = BuStartClick
+      TabOrder = 0
+    end
+    object BuStop: TButton
+      Left = 137
+      Height = 31
+      Top = 24
+      Width = 94
+      Caption = 'Stop'
+      OnClick = BuStopClick
+      TabOrder = 1
+    end
+    object BuPause: TButton
+      Left = 328
+      Height = 31
+      Top = 24
+      Width = 94
+      Caption = 'Pause'
+      OnClick = BuPauseClick
+      TabOrder = 2
+    end
+    object BuRestart: TButton
+      Left = 448
+      Height = 31
+      Top = 24
+      Width = 94
+      Caption = 'Restart'
+      OnClick = BuRestartClick
+      TabOrder = 3
+    end
+  end
+end
