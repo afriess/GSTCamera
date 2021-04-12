@@ -91,9 +91,9 @@ while i <= high(mem) do
      label1.caption :=  FloatToStr(i/high(mem)*100)+'%';
      Application.ProcessMessages;
      end;
-
-	end; // while;
+end; // while;
   img.InvalidateBitmap;
+  img.saveToFile('./fullBayer.png');
   tmp := TBGRABitmap.create;
   BGRAreplace (tmp, img.Resample(Image1.width,image1.height));
   tmp.draw (Image1.Canvas,0,0);

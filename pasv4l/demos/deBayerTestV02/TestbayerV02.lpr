@@ -16,7 +16,7 @@ begin
   RequireDerivedFormResource:=True;
   Application.Scaled:=True;
   Application.Initialize;
-  Application.CreateForm(TFormWinni, FormWinni);
+  Application.CreateForm(TFormAF, FormAF);
   Application.Run;
 end.
 
