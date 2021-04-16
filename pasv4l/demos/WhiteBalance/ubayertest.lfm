@@ -1,19 +1,17 @@
 object FormAF: TFormAF
   Left = 2170
-  Height = 652
+  Height = 522
   Top = 250
-  Width = 982
+  Width = 786
   Caption = 'FormAF'
-  ClientHeight = 652
-  ClientWidth = 982
-  DesignTimePPI = 120
+  ClientHeight = 522
+  ClientWidth = 786
   Position = poDefault
-  LCLVersion = '2.0.13.0'
   object Button1: TButton
-    Left = 16
-    Height = 31
-    Top = 10
-    Width = 94
+    Left = 13
+    Height = 25
+    Top = 8
+    Width = 75
     Caption = 'Button1'
     OnClick = Button1Click
     ParentFont = False
@@ -28,54 +26,73 @@ object FormAF: TFormAF
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 611
-    Top = 41
-    Width = 982
-    HorzScrollBar.Page = 113
-    VertScrollBar.Page = 113
+    Height = 489
+    Top = 33
+    Width = 786
+    HorzScrollBar.Page = 466
+    VertScrollBar.Page = 90
     Anchors = [akTop, akLeft, akRight, akBottom]
     AutoSize = True
-    ClientHeight = 607
-    ClientWidth = 978
+    ClientHeight = 485
+    ClientWidth = 782
+    ParentFont = False
     TabOrder = 1
+    OnClick = ScrollBox1Click
+    OnResize = ScrollBox1Resize
     object Image1: TImage
       AnchorSideLeft.Control = ScrollBox1
+      AnchorSideTop.Control = ScrollBox1
+      AnchorSideBottom.Control = ScrollBox1
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 485
+      Top = 0
+      Width = 376
+      Anchors = [akTop, akLeft, akBottom]
+      Proportional = True
+      Stretch = True
+    end
+    object Image2: TImage
+      AnchorSideLeft.Control = Image1
+      AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = ScrollBox1
       AnchorSideRight.Control = ScrollBox1
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ScrollBox1
       AnchorSideBottom.Side = asrBottom
-      Left = 0
-      Height = 607
+      Left = 376
+      Height = 485
       Top = 0
-      Width = 978
+      Width = 406
       Anchors = [akTop, akLeft, akRight, akBottom]
-      Proportional = True
-      Stretch = True
     end
   end
   object CBBlue: TCheckBox
-    Left = 168
-    Height = 24
-    Top = 8
-    Width = 71
+    Left = 134
+    Height = 19
+    Top = 6
+    Width = 58
     Caption = 'CBBlue'
+    Checked = True
+    ParentFont = False
+    State = cbChecked
     TabOrder = 2
   end
   object CBGreen: TCheckBox
-    Left = 280
-    Height = 24
-    Top = 8
-    Width = 81
+    Left = 224
+    Height = 19
+    Top = 6
+    Width = 66
     Caption = 'CBGreen'
+    ParentFont = False
     TabOrder = 3
   end
   object ComboBox1: TComboBox
-    Left = 392
-    Height = 28
-    Top = 6
-    Width = 125
-    ItemHeight = 20
+    Left = 314
+    Height = 23
+    Top = 5
+    Width = 100
+    ItemHeight = 15
     ItemIndex = 0
     Items.Strings = (
       'None'
@@ -86,21 +103,23 @@ object FormAF: TFormAF
       'Fluorescent lamp 4400k'
       'Tungsten lamp 2800k'
     )
+    ParentFont = False
     TabOrder = 4
     Text = 'None'
   end
   object ComboBox2: TComboBox
-    Left = 593
-    Height = 28
-    Top = 8
-    Width = 125
-    ItemHeight = 20
+    Left = 474
+    Height = 23
+    Top = 6
+    Width = 100
+    ItemHeight = 15
     ItemIndex = 0
     Items.Strings = (
       'None'
       'Normalize false'
       'Normalize true'
     )
+    ParentFont = False
     TabOrder = 5
     Text = 'None'
   end

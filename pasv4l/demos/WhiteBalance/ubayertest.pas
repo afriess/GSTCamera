@@ -29,8 +29,11 @@ type
     ComboBox1: TComboBox;
     ComboBox2: TComboBox;
     Image1: TImage;
+    Image2: TImage;
     ScrollBox1: TScrollBox;
     procedure Button1Click(Sender: TObject);
+    procedure ScrollBox1Click(Sender: TObject);
+    procedure ScrollBox1Resize(Sender: TObject);
   private
     BMP: TBitmap;
     aMS: TMemoryStream;
@@ -328,6 +331,10 @@ begin
         SetLength(mem,0);
         // Zeichnen
         img.InvalidateBitmap;
+        tmp := TBGRABitmap.create;
+        BGRAreplace (tmp, img.Resample(Image1.width,image1.height));
+        tmp.draw (Image1.Canvas,0,0);
+        tmp.free;
         case ComboBox2.ItemIndex of
           1: img.InplaceNormalize(false);
           2: img.InplaceNormalize(true);
@@ -335,8 +342,8 @@ begin
         if (ComboBox1.ItemIndex >= 0) then
           GrayWorld(img,TWBPreset(ComboBox1.ItemIndex));
         tmp := TBGRABitmap.create;
-        BGRAreplace (tmp, img.Resample(Image1.width,image1.height));
-        tmp.draw (Image1.Canvas,0,0);
+        BGRAreplace (tmp, img.Resample(Image2.width,image2.height));
+        tmp.draw (Image2.Canvas,0,0);
       end
       else
         ShowMessage('Kein Bild gefunden');
@@ -350,6 +357,16 @@ begin
     tmp.Free;
     tmp:= nil;
   end;
+end;
+
+procedure TFormAF.ScrollBox1Click(Sender: TObject);
+begin
+
+end;
+
+procedure TFormAF.ScrollBox1Resize(Sender: TObject);
+begin
+  Image1.Width:= ScrollBox1.ClientWidth div 2;
 end;
 
 end.
