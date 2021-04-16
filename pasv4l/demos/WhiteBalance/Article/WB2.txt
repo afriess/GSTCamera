@@ -1,0 +1,559 @@
+source: http://cv2.csie.ntu.edu.tw/DC_upload/evanscence/image.c
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define gamma_out 2.2
+#define max2(a,b) (((a) > (b)) ? (a) : (b))
+
+int gamma_table[1024] = {
+		0,1,3,5,8,9,11,12,13,14,16,17,18,20,21,22,24,25,26,28,
+		29,30,32,33,34,36,37,38,39,41,42,43,45,46,47,49,50,51,53,54,
+		55,57,58,59,61,62,63,64,66,67,68,70,71,72,74,75,76,78,79,80,
+		82,83,84,85,87,87,88,89,89,90,91,91,92,93,93,94,95,95,96,97,
+		97,98,99,99,100,101,101,102,103,103,104,105,105,106,107,107,108,108,109,110,
+		110,111,112,112,113,114,114,115,116,116,117,118,118,119,120,120,121,122,122,123,
+		124,124,125,126,126,127,128,128,129,129,130,130,130,130,131,131,131,132,132,132,
+		133,133,133,134,134,134,135,135,135,136,136,136,137,137,137,138,138,138,139,139,
+		139,140,140,140,141,141,141,142,142,142,143,143,143,144,144,144,145,145,145,146,
+		146,146,147,147,147,148,148,148,149,149,149,150,150,150,151,151,151,152,152,152,
+		153,153,153,154,154,154,154,155,155,155,156,156,156,157,157,157,158,158,158,159,
+		159,159,160,160,160,161,161,161,162,162,162,163,163,163,164,164,164,165,165,165,
+		166,166,166,167,167,167,168,168,168,169,169,169,170,170,170,171,171,171,171,171,
+		172,172,172,172,172,172,173,173,173,173,173,173,174,174,174,174,174,174,175,175,
+		175,175,175,175,176,176,176,176,176,176,176,177,177,177,177,177,177,178,178,178, 
+		178,178,178,179,179,179,179,179,179,180,180,180,180,180,180,181,181,181,181,181,
+		181,182,182,182,182,182,182,183,183,183,183,183,183,184,184,184,184,184,184,185,
+		185,185,185,185,185,186,186,186,186,186,186,187,187,187,187,187,187,188,188,188,
+		188,188,188,189,189,189,189,189,189,189,190,190,190,190,190,190,191,191,191,191,
+		191,191,192,192,192,192,192,192,193,193,193,193,193,193,194,194,194,194,194,194,
+		195,195,195,195,195,195,196,196,196,196,196,196,197,197,197,197,197,197,198,198,
+		198,198,198,198,199,199,199,199,199,199,200,200,200,200,200,200,201,201,201,201,
+		201,201,201,202,202,202,202,202,202,203,203,203,203,203,203,204,204,204,204,204,
+		204,205,205,205,205,205,205,206,206,206,206,206,206,207,207,207,207,207,207,208,
+		208,208,208,208,208,209,209,209,209,209,209,210,210,210,210,210,210,211,211,211,
+		211,211,211,212,212,212,212,212,212,213,213,213,213,213,213,213,213,213,213,214,
+		214,214,214,214,214,214,214,214,214,214,214,215,215,215,215,215,215,215,215,215,
+		215,215,215,216,216,216,216,216,216,216,216,216,216,216,216,217,217,217,217,217,
+		217,217,217,217,217,217,217,217,218,218,218,218,218,218,218,218,218,218,218,218,
+		219,219,219,219,219,219,219,219,219,219,219,219,220,220,220,220,220,220,220,220,
+		220,220,220,220,221,221,221,221,221,221,221,221,221,221,221,221,222,222,222,222,
+		222,222,222,222,222,222,222,222,223,223,223,223,223,223,223,223,223,223,223,223,
+		223,224,224,224,224,224,224,224,224,224,224,224,224,225,225,225,225,225,225,225,
+		225,225,225,225,225,226,226,226,226,226,226,226,226,226,226,226,226,227,227,227,
+		227,227,227,227,227,227,227,227,227,228,228,228,228,228,228,228,228,228,228,228,
+		228,229,229,229,229,229,229,229,229,229,229,229,229,229,230,230,230,230,230,230,
+		230,230,230,230,230,230,231,231,231,231,231,231,231,231,231,231,231,231,232,232,
+		232,232,232,232,232,232,232,232,232,232,233,233,233,233,233,233,233,233,233,233,
+		233,233,234,234,234,234,234,234,234,234,234,234,234,234,235,235,235,235,235,235,
+		235,235,235,235,235,235,235,236,236,236,236,236,236,236,236,236,236,236,236,237,
+		237,237,237,237,237,237,237,237,237,237,237,238,238,238,238,238,238,238,238,238,
+		238,238,238,239,239,239,239,239,239,239,239,239,239,239,239,240,240,240,240,240,
+		240,240,240,240,240,240,240,241,241,241,241,241,241,241,241,241,241,241,241,241,
+		242,242,242,242,242,242,242,242,242,242,242,242,243,243,243,243,243,243,243,243,
+		243,243,243,243,244,244,244,244,244,244,244,244,244,244,244,244,245,245,245,245,
+		245,245,245,245,245,245,245,245,246,246,246,246,246,246,246,246,246,246,246,246,
+		247,247,247,247,247,247,247,247,247,247,247,247,247,248,248,248,248,248,248,248,
+		248,248,248,248,248,249,249,249,249,249,249,249,249,249,249,249,249,250,250,250,
+		250,250,250,250,250,250,250,250,250,251,251,251,251,251,251,251,251,251,251,251,
+		251,252,252,252,252,252,252,252,252,252,252,252,252,253,253,253,253,253,253,253,
+		253,253,253,253,253,254,254,254,254,254,254,254,254,254,254,254,254,255,255,255,
+		255,255,255,255
+};
+
+int pic[2460][3360];
+
+/* image pipeline */
+void optical_black();
+void white_balance();
+void color_interpolation();
+void color_correction();
+void gamma_correction(double);
+void edge_enhance();
+
+void RGB2YCrCb(double, double, double, double*, double*, double*);
+void color_matrix(double, double, double, int*, int*, int*);
+
+/* I/O */
+void readfile(char*);
+void writefile(char*);
+
+int r[2460][3360];
+int g[2460][3360];
+int b[2460][3360];
+
+int main(int argc,char *argv[])
+{
+int i;
+	for(i = 1; i < argc; ++i)
+	{
+		readfile(argv[i]);
+		
+		optical_black();
+		white_balance();
+		color_interpolation();
+		color_correction();
+		gamma_correction(1.07);
+		edge_enhance();
+		
+		writefile(argv[i]);
+	}
+
+	return 0;
+}
+
+void optical_black()
+{
+	int i, j, k, count;
+	int sumE, sumR, sumG, sumB;
+	int avgE, avgR, avgG, avgB;
+	
+	k = count = sumE = sumR = sumG = sumB = 0;
+	
+	for(i = 0; i <= 2460; i += 2) {
+		for(j = 0; j < 5; j += 2) {
+			sumE += pic[i][j];
+			sumR += pic[i][j+1];
+			sumB += pic[i+1][j];
+			sumG += pic[i+1][j+1];
+			++count;
+		}
+		
+		sumR += pic[i][3293];
+		sumG += pic[i+1][3293];
+		++k;
+		
+		for(j = 3294; j < 3343; j += 2) {
+			sumE += pic[i][j];
+			sumR += pic[i][j+1];
+			sumB += pic[i+1][j];
+			sumG += pic[i+1][j+1];
+			++count;
+		}
+	}
+	
+	avgE = sumE / count;
+	avgR = sumR / (count+k);
+	avgB = sumB / count;
+	avgG = sumG / (count+k);
+	
+	for(i = 0; i < 2460; i += 2) {
+		for(j = 5; j < 3293; j += 2) {
+			pic[i][j+1] = (pic[i][j+1] > avgE) ? (pic[i][j+1] - avgE) : 0;
+			pic[i][j] = (pic[i][j] > avgR) ? (pic[i][j] - avgR) : 0;
+			pic[i+1][j+1] = (pic[i+1][j+1] > avgB) ? (pic[i+1][j+1] - avgB) : 0;
+			pic[i+1][j] = (pic[i+1][j] > avgG) ? (pic[i+1][j] - avgG) : 0;
+		}
+	}
+}
+
+void white_balance()
+{
+	int i, j, k;
+	double r_his[16384], g_his[16384], b_his[16384];
+	double temp;
+	double Y_his, Cr_his, Cb_his;
+	double Y_bright, Cr_bright, Cb_bright;
+	double avg_Y_his, avg_Cr_his1, avg_Cr_his2, avg_Cb_his1, avg_Cb_his2;
+	int num_Y, num_Cr1, num_Cr2, num_Cb1, num_Cb2;
+	double Y_up, Cr_up, Cb_up, Y_low, Cr_low, Cb_low;
+	double r_white, g_white, b_white;
+	double Y_white;
+	double r_scale, g_scale, b_scale;
+	double r_gwa, g_gwa, b_gwa;
+	double r_avg, g_avg, b_avg, Y_avg;
+	double avg_r_his, avg_g_his, avg_b_his;
+	double r_fac, g_fac, b_fac;
+	
+	k = 0;
+	memset(r_his, 0, sizeof(r_his));
+	memset(g_his, 0, sizeof(g_his));
+	memset(b_his, 0, sizeof(b_his));
+	
+	/* white object purification */
+	for(i = 0; i < 2460; i += 2) {
+		for(j = 5; j < 3293; j += 2) {
+			++r_his[pic[i][j]];
+			++g_his[pic[i+1][j]];
+			++b_his[pic[i+1][j+1]];
+			++k;
+		}
+	}
+	
+	for(i = 1; i < 16384; ++i) {
+		r_his[i] += r_his[i-1];
+		g_his[i] += g_his[i-1];
+		b_his[i] += b_his[i-1];
+	}
+	
+	temp = 16384.0 / k;
+	for(i = 0; i < 16384; ++i) {
+		r_his[i] *= temp;
+		g_his[i] *= temp;
+		b_his[i] *= temp;
+	}
+	
+	Y_bright = 0.0;
+	Cr_bright = Cb_bright = 192.0;
+	avg_Y_his = avg_Cr_his1 = avg_Cr_his2 = avg_Cb_his1 = avg_Cb_his2 = 0.0;
+	num_Y = num_Cr1 = num_Cr2 = num_Cb1 = num_Cb2 = 0;
+	
+	/* white object detection */
+	for(i = 0; i < 2460; i += 2) {
+		for(j = 5; j < 3293; j += 2) {
+			RGB2YCrCb(r_his[pic[i][j]], g_his[pic[i+1][j]], b_his[pic[i+1][j+1]], &Y_his, &Cr_his, &Cb_his);
+			
+			if((Y_his >= 12000.0)&&(fabs(Cr_his) <= 192.0)&&(fabs(Cb_his) <= 192.0)) {
+				
+				/* find the brightest pixel from white point */
+				Y_bright = max2(Y_bright, Y_his);
+				if(fabs(Cr_bright) > fabs(Cr_his))
+					Cr_bright = Cr_his;
+				if(fabs(Cb_bright) > fabs(Cb_his))
+					Cb_bright = Cb_his;
+				
+				avg_Y_his += Y_his;
+				++num_Y;
+				
+				if(Cr_his > 0) {
+					avg_Cr_his1 += Cr_his;
+					++num_Cr1;
+				} else {
+					avg_Cr_his2 += Cr_his;
+					++num_Cr2;
+				}
+				
+				if(Cb_his > 0) {
+					avg_Cb_his1 += Cb_his;
+					++num_Cb1;
+				} else {
+					avg_Cb_his2 += Cb_his;
+					++num_Cb2;
+				}
+			}
+		}
+	}
+	
+	if(num_Y == 0)
+		return;
+	
+	avg_Y_his /= num_Y * 2;
+	avg_Cr_his1 /= num_Cr1;
+	avg_Cr_his2 /= num_Cr2;
+	avg_Cb_his1 /= num_Cb1;
+	avg_Cb_his2 /= num_Cb2;
+	
+	if(Y_bright > avg_Y_his) {
+		Y_up = Y_bright;
+		Y_low = avg_Y_his;
+	} else {
+		Y_up = avg_Y_his;
+		Y_low = Y_bright;
+	}
+	
+	if(Cr_bright > avg_Cr_his1) {
+		Cr_up = Cr_bright;
+		Cr_low = avg_Cr_his2;
+	} else if(Cr_bright < avg_Cr_his2) {
+		Cr_up = avg_Cr_his1;
+		Cr_low = Cr_bright;
+	} else {
+		Cr_up = avg_Cr_his1;
+		Cr_low = avg_Cr_his2;
+	}
+	
+	if(Cb_bright > avg_Cb_his1) {
+		Cb_up = Cb_bright;
+		Cb_low = avg_Cb_his2;
+	} else if(Cb_bright < avg_Cb_his2) {
+		Cb_up = avg_Cb_his1;
+		Cb_low = Cb_bright;
+	} else {
+		Cb_up = avg_Cb_his1;
+		Cb_low = avg_Cb_his2;
+	}
+	
+	k = 0;
+	r_white = g_white = b_white = 0.0;
+	for(i = 0; i < 2460; i += 2) {
+		for(j = 5; j < 3293; j += 2) {
+			RGB2YCrCb(r_his[pic[i][j]], g_his[pic[i+1][j]], b_his[pic[i+1][j+1]], &Y_his, &Cr_his, &Cb_his);
+			
+			if((Y_his <= Y_up)&&(Y_his >= Y_low)&&(Cr_his <= Cr_up)&&(Cr_his >= Cr_low)&&(Cb_his <= Cb_up)&&(Cb_his >= Cb_low)) {
+				r_white += pic[i][j];
+				g_white += pic[i+1][j];
+				b_white += pic[i+1][j+1];
+				++k;
+			}
+		}
+	}
+	
+	r_white /= k;
+	g_white /= k;
+	b_white /= k;
+	
+	/* white object adjustment */
+	Y_white = 0.299 * r_white + 0.587 * g_white + 0.114 * b_white;
+	r_scale = Y_white / r_white;
+	g_scale = Y_white / g_white;
+	b_scale = Y_white / b_white;
+	
+	k = 0;
+	r_avg = g_avg = b_avg = avg_r_his = avg_g_his = avg_b_his = 0.0;
+	for(i = 0; i < 2460; i += 2) {
+		for(j = 5; j < 3293; j += 2) {
+			r_avg += pic[i][j];
+			g_avg += pic[i+1][j];
+			b_avg += pic[i+1][j+1];
+			
+			avg_r_his += r_his[pic[i][j]];
+			avg_g_his += g_his[pic[i+1][j]];
+			avg_b_his += b_his[pic[i+1][j+1]];
+			
+			++k;
+		}
+	}
+	
+	r_avg /= k;
+	g_avg /= k;
+	b_avg /= k;
+	
+	avg_r_his /= k;
+	avg_g_his /= k;
+	avg_b_his /= k;
+	
+	Y_avg = 0.299 * r_avg + 0.587 * g_avg + 0.114 * b_avg;
+	r_gwa = Y_avg / r_avg;
+	g_gwa = Y_avg / g_avg;
+	b_gwa = Y_avg / b_avg;
+	
+	if((avg_b_his + 192.0 >= avg_g_his)&&(avg_b_his > avg_r_his)) {
+		r_fac = r_scale;
+		g_fac = g_scale;
+		b_fac = b_gwa;
+	} else if((avg_g_his + 192.0 > avg_r_his)&&(avg_r_his > avg_b_his)) {
+		r_fac = r_scale;
+		g_fac = g_gwa;
+		b_fac = b_scale;
+	} else if((avg_r_his > avg_g_his)&&(avg_g_his > avg_b_his)) {
+		r_fac = r_gwa;
+		g_fac = g_scale;
+		b_fac = b_scale;
+	} else {
+		r_fac = r_scale;
+		g_fac = g_scale;
+		b_fac = b_scale;
+	}
+	
+	if((r_fac == 1)&&(g_fac == 1)&&(b_fac == 1))
+		return;
+	
+	for(i = 0; i < 2460; i += 2) {
+		for(j = 5; j < 3293; j += 2) {
+			pic[i][j] *= r_fac;
+			pic[i+1][j] *= g_fac;
+			pic[i+1][j+1] *= b_fac;
+			
+			if(pic[i][j] < 0)
+				pic[i][j] = 0;
+			else if(pic[i][j] > 16383)
+				pic[i][j] = 16383;
+			
+			if(pic[i+1][j] < 0)
+				pic[i+1][j] = 0;
+			else if(pic[i+1][j] > 16383)
+				pic[i+1][j] = 16383;
+			
+			if(pic[i+1][j+1] < 0)
+				pic[i+1][j+1] = 0;
+			else if(pic[i+1][j+1] > 16383)
+				pic[i+1][j+1] = 16383;
+		}
+	}
+}
+
+void color_interpolation()
+{
+	int i, j;
+	
+	for(i = 0; i < 2460; i += 2) {
+		for(j = 5; j < 3293; j += 2) {
+			/* r */
+			r[i][j] = pic[i][j];
+			g[i][j] = 0.5 * (pic[i-1][j] + pic[i+1][j]);
+			b[i][j] = 0.25 * (pic[i-1][j-1] + pic[i-1][j+1] + pic[i+1][j-1] + pic[i+1][j+1]);
+			
+			++i;
+			/* g */
+			r[i][j] = 0.5 * (pic[i-1][j] + pic[i+1][j]);
+			g[i][j] = pic[i][j];
+			b[i][j] = 0.5 * (pic[i][j-1] + pic[i][j+1]);
+			
+			++j;
+			/* b */
+			r[i][j] = 0.25 * (pic[i-1][j-1] + pic[i-1][j+1] + pic[i+1][j-1] + pic[i+1][j+1]);
+			g[i][j] = 0.5 * (pic[i][j-1] + pic[i][j+1]);
+			b[i][j] = pic[i][j];
+			
+			--i;
+			/* e */
+			r[i][j] = 0.5 * (pic[i][j-1] + pic[i][j+1]);
+			g[i][j] = 0.25 * (pic[i-1][j-1] + pic[i-1][j+1] + pic[i+1][j-1] + pic[i+1][j+1]);
+			b[i][j] = 0.5 * (pic[i-1][j] + pic[i+1][j]);
+			
+			--j;
+		}
+	}
+}
+
+void gamma_correction(double gamma_in)
+{
+	int i, j;
+	double t;
+	int gamma_cor[16384];
+	
+	/* store the number after gamma correction in a table */
+	for(i = 0; i < 16384; ++i) {
+		t = pow(i+1, gamma_in);
+		j = t / 16;
+		
+		if(j > 1023)
+			j = 1023;
+		
+		gamma_cor[i] = gamma_table[j];
+	}
+	
+	/* look up table to do gamma correction */
+	for(i = 0; i < 2460; ++i) {
+		for(j = 5; j < 3293; ++j) {
+			r[i][j] = gamma_cor[r[i][j]];
+			g[i][j] = gamma_cor[g[i][j]];
+			b[i][j] = gamma_cor[b[i][j]];
+		}
+	}
+}
+
+void edge_enhance()
+{
+	int i, j;
+	
+	for(i = 1; i < 2459; ++i) {
+		for(j = 6; j < 3292; ++j) {
+			r[i][j] = 2 * r[i][j] - 0.25 * (r[i-1][j] + r[i+1][j] + r[i][j-1] + r[i][j+1]);
+			g[i][j] = 2 * g[i][j] - 0.25 * (g[i-1][j] + g[i+1][j] + g[i][j-1] + g[i][j+1]);
+			b[i][j] = 2 * b[i][j] - 0.25 * (b[i-1][j] + b[i+1][j] + b[i][j-1] + b[i][j+1]);
+			
+			if(r[i][j] > 255)
+				r[i][j] = 255;
+			else if(r[i][j] < 0)
+				r[i][j] = 0;
+			
+			if(g[i][j] > 255)
+				g[i][j] = 255;
+			else if(g[i][j] < 0)
+				g[i][j] = 0;
+			
+			if(b[i][j] > 255)
+				b[i][j] = 255;
+			else if(b[i][j] < 0)
+				b[i][j] = 0;
+		}
+	}
+}
+
+void color_correction()
+{
+	int i, j;
+	
+	for(i = 0; i < 2460; ++i) {
+		for(j = 5; j < 3293; ++j) {
+			color_matrix(r[i][j], g[i][j], b[i][j], &r[i][j], &g[i][j], &b[i][j]);
+			
+			if(r[i][j] > 16383)
+				r[i][j] = 16383;
+			else if(r[i][j] < 0)
+				r[i][j] = 0;
+			
+			if(g[i][j] > 16383)
+				g[i][j] = 16383;
+			else if(g[i][j] < 0)
+				g[i][j] = 0;
+			
+			if(b[i][j] > 16383)
+				b[i][j] = 16383;
+			else if(b[i][j] < 0)
+				b[i][j] = 0;
+		}
+	}
+}
+
+void RGB2YCrCb(double r, double g, double b, double* Y, double* Cr, double* Cb)
+{
+	*Y = 0.299 * r + 0.587 * g + 0.114 * b;
+	*Cr = 0.5 * r - 0.4187 * g - 0.0813 * b;
+	*Cb = -0.1687 * r - 0.3313 * g + 0.5 * b;
+}
+
+void color_matrix(double r, double g, double b, int* r_, int* g_, int* b_)
+{
+	*r_ = (1.265625 * r - 0.28125 * g + 0.5);
+	*g_ = (-0.1875 * r + 1.203125 * g - 0.046875 * b + 0.5);
+	*b_ = (-0.078125 * r - 0.296875 * g + 1.359375 * b + 0.5);
+}
+
+void readfile(char* filename)
+{
+	int i, j;
+	FILE *fp = fopen(filename, "rb");
+	
+	fseek(fp,862144,SEEK_SET);
+	for(i=0;i<2460;i++) {
+		for(j=0;j<3360;j++) {
+			pic[i][j]=0;
+			fread(&pic[i][j], 1, 1, fp);
+			pic[i][j]<<=8;
+			fread(&pic[i][j], 1, 1, fp);
+		}
+	}
+	fclose(fp);	
+}
+
+void writefile(char* name)
+{
+	int i, j;
+	char filename[100], header[54] = {'B', 'M',	/**/
+		0x36, 0xC4, 0x6D, 0x01,	/* bfSzie 3264*2448*3 + 54 */
+		0, 0, 0, 0,	/* bfReserved */
+		0x36, 0, 0, 0,	/* bfOffbits */
+		0x28, 0, 0, 0,	/* biSize */
+		0xC0, 0x0C, 0, 0,	/* biWidth 3264 */
+		0x90, 0x09, 0, 0,	/* biheigh 2448 */
+		0x01, 0,	/* biPlanes */
+		0x18, 0,	/* biBitCounter */
+		0, 0, 0, 0,	/* biCompression 0 */
+		0x00, 0xC4, 0x6D, 0x01,	/* biSizeImage 3264*2448*3 */
+		0, 0, 0, 0,	/* biXPelsPermeter */
+		0, 0, 0, 0,	/* biYPelsPermeter */
+		0, 0, 0, 0,	/* biClrUsed */
+		0, 0, 0, 0	/* biClrImportant */
+		};
+	
+	strcpy(filename, name);
+	strcat(filename, ".bmp");
+	
+	FILE* fptr = fopen(filename, "wb");
+	
+	fwrite(header, 1, 54, fptr);
+	
+	for(i = 2453; i >= 6; --i ) {
+		for(j = 17; j <= 3280; ++j) {
+			fwrite(&(b[i][j]), 1, 1, fptr);
+			fwrite(&(g[i][j]), 1, 1, fptr);
+			fwrite(&(r[i][j]), 1, 1, fptr);
+		}
+	}
+	
+	fclose(fptr);
+}
