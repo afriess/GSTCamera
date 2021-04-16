@@ -181,8 +181,6 @@ var
   aRect:TRect;
   pos,cnt: LongInt;
   w,h,s: integer;
-  x: cvsize;
-
   i: Integer;
   p: PBGRAPixel;
   img,tmp : TBGRABitmap;
@@ -205,19 +203,8 @@ begin
       pos:=aMS.Size;
       if pos > 0 then begin
         aMS.Position:= 0;
-        X.width:= w;
-        x.height:= h;
         SetLength(mem,w*h*3);
-        if CBBlue.Checked then
-          blue:= 1
-        else
-          blue:= 0;
-        if CBGreen.Checked then
-          green:= 1
-        else
-          green:= -1;
-        deBayer(aMS.Memory, w, @mem[0], w*3, x, blue,green);
-        // SGBRG8_to_BGRA(aMS.Memory , pointer(p), w, h);
+        SGBRG8_to_BGR(aMS.Memory , @mem[0], w, h);
         for i:= 0 to w*h-1 do begin
           p^.red  := mem[i*3+0];
           p^.green:= mem[i*3+1];

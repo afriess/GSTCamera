@@ -11,8 +11,10 @@ uses
 
 // Conversation from Bayer 8 Bit see http://www.siliconimaging.com/RGB%20Bayer.htm
 //
-procedure SRGGB8_to_BGRA(src: PByte; dest: PByte; w, h: integer); {  8  RGRG.. GBGB.. *}
-procedure SGBRG8_to_BGRA(src: PByte; dest: PByte; w, h: integer); {  8  GBGB.. RGRG.. *}
+// Attention only BGR not BGRA !!!! This is not compatible  with Linux TBitmap.RawImage
+procedure SRGGB8_to_BGR(src: PByte; dest: PByte; w, h: integer); {  8  RGRG.. GBGB.. *}
+// Attention only BGR not BGRA !!!! This is not compatible  with Linux TBitmap.RawImage
+procedure SGBRG8_to_BGR(src: PByte; dest: PByte; w, h: integer); {  8  GBGB.. RGRG.. *}
 
 
 implementation
@@ -36,16 +38,6 @@ function icvBayer2BGR_8u_C1C3R(
      size:cvsize;
      blue,
      start_with_green:cint):cvstatus;
-const
-  //{$IFDEF Windows}
-  //// Windows uses BGR = 3 Bytes per pixel in Bitmap
-  //rgb_step= 3;
-  //rgba_corr= 0;
-  //{$ELSE}
-  // Linux uses BGRA = 4 Bytes per pixel in Bitmap
-  rgb_step= 4;
-  rgba_corr= 1;
-  //{$ENDIF}
 var
     t0,t1 :cint;
     bayer_end,
@@ -56,15 +48,15 @@ begin
   Result:= 0;
   // Destination clear
   // wide of picture * RGB * size of byte
-  cnt:= size.width*rgb_step*sizeof(dst0[0]);
+  cnt:= size.width*3*sizeof(dst0[0]);
   // heighth of picture minus one * size of one line
   start:= (size.height - 1)*dst_step;
   //
-  //fillchar( dst0^, cnt, #0);
-  //fillchar( (dst0 + start)^, cnt ,#0 );
+  fillchar( dst0^, cnt, #0);
+  fillchar( (dst0 + start)^, cnt ,#0 );
 //    memset( dst0, 0, size.width*3*sizeof(dst0[0]) );
 //    memset( dst0 + (size.height - 1)*dst_step, 0, size.width*3*sizeof(dst0[0]) );
-  inc(dst0 ,dst_step + rgb_step + 1);
+  inc(dst0 ,dst_step + 3 + 1);
   dec(size.height , 2);
   dec(size.width , 2);
   repeat
@@ -75,12 +67,12 @@ begin
 {       const uchar* bayer = bayer0;
       uchar* dst = dst0;
       const uchar* bayer_end = bayer + size.width;}
-    dst[-4 + (-1*rgba_corr)] :=0;
-    dst[-3 + (-1*rgba_corr)] :=0;
-    dst[-2 + (-1*rgba_corr)] :=0;
-    dst[size.width*rgb_step-1] :=0;
-    dst[size.width*rgb_step]   :=0;
-    dst[size.width*rgb_step+1] :=0;
+    dst[-4] :=0;
+    dst[-3] :=0;
+    dst[-2] :=0;
+    dst[size.width*3-1] :=0;
+    dst[size.width*3]   :=0;
+    dst[size.width*3+1] :=0;
     if( size.width <= 0 ) then
         goto 123; // continue; // can't use contineu because of decrement operator abuse + for
     if( start_with_green )<>0 then
@@ -91,7 +83,7 @@ begin
         dst[0] := bayer[bayer_step+1];
         dst[blue] := (t1);
         inc(bayer);
-        inc(dst, rgb_step);
+        inc(dst, 3);
      end;
 
     if( blue > 0 ) then
@@ -109,12 +101,12 @@ begin
 
             t0 := (ord(bayer[2]) + ord(bayer[bayer_step*2+2]) + 1) shr {>>} 1;
             t1 := (ord(bayer[bayer_step+1]) + ord(bayer[bayer_step+3]) + 1) shr {>>} 1;
-            dst[2 + rgba_corr] := (t0);
-            dst[3 + rgba_corr] := bayer[bayer_step+2];
-            dst[4 + rgba_corr] := (t1);
+            dst[2] := (t0);
+            dst[3] := bayer[bayer_step+2];
+            dst[4] := (t1);
 
           inc(bayer,2);
-          inc(dst,rgb_step*2);
+          inc(dst,6);
         until bayer>(bayer_end-2);
      end
     else
@@ -131,11 +123,11 @@ begin
 
             t0 := (ord(bayer[2]) + ord(bayer[bayer_step*2+2]) + 1) {>>} shr 1;
             t1 := (ord(bayer[bayer_step+1]) + ord(bayer[bayer_step+3]) + 1) {>>} shr 1;
-            dst[4 + rgba_corr] := (t0);
-            dst[3 + rgba_corr] := bayer[bayer_step+2];
-            dst[2 + rgba_corr] := (t1);
+            dst[4] := (t0);
+            dst[3] := bayer[bayer_step+2];
+            dst[2] := (t1);
             inc(bayer,2);
-          inc(dst,rgb_step*2);
+          inc(dst,6);
         until bayer>(bayer_end-2);
      end;
 
@@ -149,7 +141,7 @@ begin
         dst[0] := (t1);
         dst[blue] := bayer[bayer_step+1];
         inc(bayer);
-        inc(dst,rgb_step);
+        inc(dst,3);
     end;
     blue := -blue;
     start_with_green := not start_with_green;
@@ -175,7 +167,8 @@ end;
 ////    int start_with_green = code == CV_BayerGB2BGR || code == CV_BayerGR2BGR;
 
 
-procedure SRGGB8_to_BGRA(src: PByte; dest: PByte; w, h:  integer);
+// Attention only BGR not BGRA !!!! This is not compatible  with Linux TBitmap.RawImage
+procedure SRGGB8_to_BGR(src: PByte; dest: PByte; w, h:  integer);
 var
   //i: Integer;
   //blue,
@@ -191,7 +184,8 @@ begin
 end;
 
 
-procedure SGBRG8_to_BGRA(src: PByte; dest: PByte; w, h: integer);
+// Attention only BGR not BGRA !!!! This is not compatible  with Linux TBitmap.RawImage
+procedure SGBRG8_to_BGR(src: PByte; dest: PByte; w, h: integer);
 var
   //blue,
   //start_with_green:cint;
@@ -201,8 +195,8 @@ var
 begin
   x.width:=w;
   x.height:=h;
-  wx:= w * 4;  // 4 * for RGBA Linux
-  res := icvBayer2BGR_8u_C1C3R(src,w ,dest, wx ,x,-1,0);
+  wx:= w * 3;  // 3 * for RGB
+  res := icvBayer2BGR_8u_C1C3R(src,w ,dest, wx ,x,1,-1);
 end;
 
 
