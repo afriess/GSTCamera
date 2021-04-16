@@ -68,7 +68,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="2">
       <Unit0>
         <Filename Value="WhiteBalanceV01.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -81,10 +81,6 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uBayerTest"/>
       </Unit1>
-      <Unit2>
-        <Filename Value="WB2.txt"/>
-        <IsPartOfProject Value="True"/>
-      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

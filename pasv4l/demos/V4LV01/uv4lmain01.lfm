@@ -1,12 +1,11 @@
 object Form1: TForm1
   Left = 348
-  Height = 602
+  Height = 482
   Top = 32
-  Width = 984
+  Width = 787
   Caption = 'Form1'
-  ClientHeight = 602
-  ClientWidth = 984
-  DesignTimePPI = 120
+  ClientHeight = 482
+  ClientWidth = 787
   OnCreate = FormCreate
   object ScrollBox1: TScrollBox
     AnchorSideLeft.Control = Owner
@@ -15,14 +14,15 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Panel1
     Left = 0
-    Height = 528
+    Height = 422
     Top = 0
-    Width = 984
-    HorzScrollBar.Page = 131
-    VertScrollBar.Page = 131
+    Width = 787
+    HorzScrollBar.Page = 105
+    VertScrollBar.Page = 105
     Anchors = [akTop, akLeft, akRight, akBottom]
-    ClientHeight = 524
-    ClientWidth = 980
+    ClientHeight = 418
+    ClientWidth = 783
+    ParentFont = False
     TabOrder = 0
     object PaintBox: TPaintBox
       AnchorSideLeft.Control = ScrollBox1
@@ -32,10 +32,11 @@ object Form1: TForm1
       AnchorSideBottom.Control = ScrollBox1
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 524
+      Height = 418
       Top = 0
-      Width = 980
+      Width = 783
       Anchors = [akTop, akLeft, akRight, akBottom]
+      ParentFont = False
     end
   end
   object Panel1: TPanel
@@ -45,47 +46,52 @@ object Form1: TForm1
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 74
-    Top = 528
-    Width = 984
+    Height = 60
+    Top = 422
+    Width = 787
     Anchors = [akTop, akLeft, akRight, akBottom]
-    ClientHeight = 74
-    ClientWidth = 984
+    ClientHeight = 60
+    ClientWidth = 787
+    ParentFont = False
     TabOrder = 1
     object BuStart: TButton
-      Left = 24
-      Height = 31
-      Top = 24
-      Width = 94
+      Left = 19
+      Height = 25
+      Top = 19
+      Width = 75
       Caption = 'Start'
       OnClick = BuStartClick
+      ParentFont = False
       TabOrder = 0
     end
     object BuStop: TButton
-      Left = 137
-      Height = 31
-      Top = 24
-      Width = 94
+      Left = 110
+      Height = 25
+      Top = 19
+      Width = 75
       Caption = 'Stop'
       OnClick = BuStopClick
+      ParentFont = False
       TabOrder = 1
     end
     object BuPause: TButton
-      Left = 328
-      Height = 31
-      Top = 24
-      Width = 94
+      Left = 262
+      Height = 25
+      Top = 19
+      Width = 75
       Caption = 'Pause'
       OnClick = BuPauseClick
+      ParentFont = False
       TabOrder = 2
     end
     object BuRestart: TButton
-      Left = 448
-      Height = 31
-      Top = 24
-      Width = 94
+      Left = 358
+      Height = 25
+      Top = 19
+      Width = 75
       Caption = 'Restart'
       OnClick = BuRestartClick
+      ParentFont = False
       TabOrder = 3
     end
   end

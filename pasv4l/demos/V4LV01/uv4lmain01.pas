@@ -1,6 +1,20 @@
 unit uv4lmain01;
+{ **************************
+  A. Friess 2021
+  This sample is only running on a Linux system with V4L2 installed
+  Linux X64 (Debian)
+  Raspian (32Bit)
+
+  THIS IS NOT RUNNING ON WINDOWS
+  because Windows have no V4L subsystem
+**************************** }
+
 
 {$mode objfpc}{$H+}
+
+{$IfNDef linux}
+{$Error Video4L2 is not avialiable for this platform!}
+{$endif}
 
 interface
 
@@ -147,6 +161,9 @@ procedure TForm1.VideoFrameSynchronized(Sender: TObject;
 var
   IsDebug: boolean;
   aRect:TRect;
+  mem: array of byte;
+  cnt,i:integer;
+
 begin
   // Inhibit retrigger
   if (FScanInProgress) then begin
@@ -175,7 +192,17 @@ begin
       //aMS.Position:=0;
       //aMS.SaveToFile('/tmp/SRGGB8.raw');
       BMP.BeginUpdate;
-      SRGGB8_to_BGRA(PByte(Buffer), PByte(BMP.RawImage.Data), BMP.Width, BMP.Height);
+      cnt:=0;
+      SetLength(mem,Video.Width*Video.Height*3);
+      SRGGB8_to_BGR(PByte(Buffer), @mem[0], Video.Width, Video.Height);
+      for i:= 0 to Video.Width*Video.Height-1 do begin
+        BMP.RawImage.Data[cnt+2]  := mem[i*3+0];
+        BMP.RawImage.Data[cnt+1]  := mem[i*3+1];
+        BMP.RawImage.Data[cnt+0]  := mem[i*3+2];
+        BMP.RawImage.Data[cnt+3]  := 255;
+        inc(cnt,4);
+      end;
+      SetLength(mem,0);
       BMP.EndUpdate;
     end;
     //V4L2_PIX_FMT_SGBRG8
@@ -187,7 +214,17 @@ begin
       //aMS.Position:=0;
       //aMS.SaveToFile('/tmp/SGRBG8.raw');
       BMP.BeginUpdate;
-      SGBRG8_to_BGRA(PByte(Buffer), PByte(BMP.RawImage.Data), Video.Width, Video.Height);
+      cnt:=0;
+      SetLength(mem,Video.Width*Video.Height*3);
+      SGBRG8_to_BGR(PByte(Buffer), @mem[0], Video.Width, Video.Height);
+      for i:= 0 to Video.Width*Video.Height-1 do begin
+        BMP.RawImage.Data[cnt+2]  := mem[i*3+0];
+        BMP.RawImage.Data[cnt+1]  := mem[i*3+1];
+        BMP.RawImage.Data[cnt+0]  := mem[i*3+2];
+        BMP.RawImage.Data[cnt+3]  := 255;
+        inc(cnt,4);
+      end;
+      SetLength(mem,0);
       BMP.EndUpdate;
     end;
     // V4L2_PIX_FMT_YUYV
