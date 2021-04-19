@@ -37,7 +37,6 @@ object FormAF: TFormAF
     ClientWidth = 782
     ParentFont = False
     TabOrder = 1
-    OnClick = ScrollBox1Click
     OnResize = ScrollBox1Resize
     object Image1: TImage
       AnchorSideLeft.Control = ScrollBox1
@@ -108,9 +107,9 @@ object FormAF: TFormAF
     Text = 'None'
   end
   object ComboBox2: TComboBox
-    Left = 474
+    Left = 464
     Height = 23
-    Top = 6
+    Top = 5
     Width = 100
     ItemHeight = 15
     ItemIndex = 0

@@ -32,7 +32,6 @@ type
     Image2: TImage;
     ScrollBox1: TScrollBox;
     procedure Button1Click(Sender: TObject);
-    procedure ScrollBox1Click(Sender: TObject);
     procedure ScrollBox1Resize(Sender: TObject);
   private
     BMP: TBitmap;
@@ -61,7 +60,7 @@ type
 {$R *.lfm}
 
 //see https://www.programmersought.com/article/98291796437/
-procedure GrayWorld(var img: TBGRABitmap; preset:TWBPreset);
+procedure GrayWorldLong(var img: TBGRABitmap; preset:TWBPreset);
 var
   avgR: integer = 0;
   avgG: integer = 0;
@@ -162,7 +161,7 @@ About light balance, you could convert first your image into XYZ colorspace and 
 That's not the most memory efficient way, but you get the idea. To use less memory, you can do that for each scanline into an array of colors, using the conversion function of the colorspaces. Thinking about it, that could be a new function to add to BGRABitmap.
 }
 
-procedure GrayWorld2(var img: TBGRABitmap; preset:TWBPreset);
+procedure GrayWorld(var img: TBGRABitmap; preset:TWBPreset);
 var
   p: PBGRAPixel;
   pavg: TBGRAPixel;
@@ -439,11 +438,6 @@ begin
     tmp.Free;
     tmp:= nil;
   end;
-end;
-
-procedure TFormAF.ScrollBox1Click(Sender: TObject);
-begin
-
 end;
 
 procedure TFormAF.ScrollBox1Resize(Sender: TObject);
