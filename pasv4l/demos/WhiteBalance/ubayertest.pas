@@ -149,6 +149,88 @@ begin
   end;
 end;
 
+{ Source https://forum.lazarus.freepascal.org/index.php/topic,54224.msg402653.html#msg402653
+From circular:
+There is an TBGRABitmap.AveragePixel property that computes the average color taking into account transparency.
+
+Then there is TBGRAPixel.Lightness that returns the a weighted sum of R/G/B taking as a linear value.
+
+There isn't a straightforward multiply function though you could use BlendRect function for some adjustments with blend operations like boMultiply, boSvgSoftLight, boSoftLight, boHardLight.
+
+About light balance, you could convert first your image into XYZ colorspace and then back to RGB but with a different reference white. To do so, you can for example create a TXYZABitmap of the same size as original image, call SetReferenceWhite with the target illuminant, do TXYZA.PutImage of the BGRA image, then call SetReferenceWhite with the original illuminant, then do TBGRABitmap.PutImage of the XYZA image.
+
+That's not the most memory efficient way, but you get the idea. To use less memory, you can do that for each scanline into an array of colors, using the conversion function of the colorspaces. Thinking about it, that could be a new function to add to BGRABitmap.
+}
+
+procedure GrayWorld2(var img: TBGRABitmap; preset:TWBPreset);
+var
+  p: PBGRAPixel;
+  pavg: TBGRAPixel;
+  size:integer;
+  k:double;
+  newB, newG, newR: double;
+  x: integer;
+  kb,kg,kr: double;
+begin
+  if preset = wbpNONE then
+    exit;
+  pavg:= img.AveragePixel;
+  k := 0.299 * pavg.red + 0.587 * pavg.green + 0.114 * pavg.blue;
+  case preset of
+    wbpCLOUDY: begin             // cloudy day 7500k
+      kr:= k / pavg.red   * 1.953125;
+      kg:= k / pavg.green * 1.0390625;
+      kb:= k / pavg.blue;
+      end;
+    wbpDAYLIGHT: begin           // daylight 6500k
+      kr:= k / pavg.red  * 1.2734375;
+      kg:= k / pavg.green;
+      kb:= k / pavg.blue * 1.0625;
+      end;
+    wbpINCANDESCENCE: begin      // White hot light 5000k
+      kr:= k / pavg.red  * 1.2890625;
+      kg:= k / pavg.green;
+      kb:= k / pavg.blue * 1.0625;
+      end;
+    wbpFLUORESCENT:begin         // fluorescent lamp 4400k
+      kr:= k / pavg.red  * 1.1875;
+      kg:= k / pavg.green;
+      kb:= k / pavg.blue * 1.3125;
+      end;
+    wbpTUNGSTEN:begin             // Tungsten lamp 2800k
+      kr:= k / pavg.red;
+      kg:= k / pavg.green * 1.0078125;
+      kb:= k / pavg.blue  * 1.28125;
+      end;
+  else
+    // other is treated as wbpAUTO
+    kr:= k / pavg.red  ;
+    kg:= k / pavg.green;
+    kb:= k / pavg.blue ;
+  end;
+  size:= img.Height*img.Width;
+  p:= img.Data;
+  for x:= 0 to size-1 do begin
+    newB:= p^.blue * kb;
+    newG:= p^.green * kg;
+    newR:= p^.red * kr;
+    if trunc(newB) > 255 then
+      p^.blue:= 255
+    else
+      p^.blue:= trunc(newB);
+    if trunc(newG) > 255 then
+      p^.green:= 255
+    else
+      p^.green:= trunc(newG);
+    if trunc(newR) > 255 then
+      p^.red:= 255
+    else
+      p^.red:= trunc(newR);
+    inc(p);
+  end;
+end;
+
+
 function deBayer(
      bayer0:pbbyte;
      bayer_step:cint;
@@ -340,7 +422,7 @@ begin
           2: img.InplaceNormalize(true);
         end;
         if (ComboBox1.ItemIndex >= 0) then
-          GrayWorld(img,TWBPreset(ComboBox1.ItemIndex));
+          GrayWorld2(img,TWBPreset(ComboBox1.ItemIndex));
         tmp := TBGRABitmap.create;
         BGRAreplace (tmp, img.Resample(Image2.width,image2.height));
         tmp.draw (Image2.Canvas,0,0);
