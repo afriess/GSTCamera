@@ -162,6 +162,7 @@ begin
   DoLog(nil, 'Version '+  gstlib_versionstring);
   //todo: gst-launch-1.0 v4l2src device=/dev/video1 ! image/jpeg,width=800,height=600,framerate=30/1 ! jpegparse ! jpegdec ! autovideosink
   //gst-launch-1.0 v4l2src ! jpegparse ! jpegdec ! autovideosink
+  //gst-launch-1.0 tcambin ! jpegenc ! jpegdec ! autovideosink
   pipeline:= nil;
   pipeline := gst_pipeline_new('gsttest');
 
@@ -173,7 +174,7 @@ begin
 
   videosrc := nil;
   //videosrc := gst_element_factory_make('v4l2src', 'videosrc');{ TODO -oAF : test with v4l2 only }
-  videosrc := gst_element_factory_make('v4l2src', 'videosrc');{ TODO -oAF : test with v4l2 only }
+  videosrc := gst_element_factory_make('tcambin', 'videosrc');
   if not Assigned(videosrc) then
   begin
     Memo1.Append('videosrc nil');
@@ -194,7 +195,7 @@ begin
   //  //exit;
   //end;
 
-  p2 := gst_element_factory_make('jpegparse', 'imagefilter2');
+  p2 := gst_element_factory_make('jpegenc', 'imagefilter2');
   if not Assigned(p2) then
   begin
     Memo1.Append('p2 nil');
@@ -273,8 +274,10 @@ begin
 
   //pipeline := gst_parse_launch('v4l2src device=/dev/video0 ! identity silent=false ! videoconvert ! xvimagesink',GError);
   //pipeline := gst_parse_launch('v4l2src device=/dev/video0 ! identity silent=false ! jpegenc ! filesink location=/tmp/test.jpg',GError);
-  pipeline := gst_parse_launch('playbin uri=https://www.freedesktop.org/software/gstreamer-sdk/data/media/sintel_trailer-480p.webm ! identity silent=false ',GError);
+  //pipeline := gst_parse_launch('playbin uri=https://www.freedesktop.org/software/gstreamer-sdk/data/media/sintel_trailer-480p.webm ! identity silent=false ',GError);
   //pipeline := gst_parse_launch('fakesrc silent=false num-buffers=3 ! identity silent=false ! videoconvert ! xvimagesink',GError);
+  pipeline := gst_parse_launch('tcpclientsrc port=5000 host=192.168.1.29 ! decodebin ! jpegenc ! filesink location=/tmp/test.jpg',GError);
+  //pipeline := gst_parse_launch('tcamsrc ! jpegenc ! autovideosink',GError);
 
   if not Assigned(pipeline) then
   begin
