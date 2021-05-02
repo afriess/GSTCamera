@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectGroup FileVersion="1">
+    <Targets Count="4">
+      <Target0 FileName="deBayerTestV01\Testbayer.lpi">
+        <BuildModes Count="2"/>
+        <Mode1 Name="DebugWini386"/>
+        <Mode2 Name="DebugLinuxX64"/>
+      </Target0>
+      <Target1 FileName="deBayerTestV02\TestbayerV02.lpi">
+        <BuildModes Count="2"/>
+        <Mode1 Name="DebugWini386" Compile="True"/>
+        <Mode2 Name="DebugLinuxX64"/>
+      </Target1>
+      <Target2 FileName="WhiteBalance\WhiteBalanceV01.lpi">
+        <BuildModes Count="2"/>
+        <Mode1 Name="DebugWini386" Compile="True"/>
+        <Mode2 Name="DebugLinuxX64"/>
+      </Target2>
+      <Target3 FileName="V4LV01\V4lTestV01.lpi"/>
+    </Targets>
+  </ProjectGroup>
+</CONFIG>

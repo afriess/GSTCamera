@@ -1,0 +1,139 @@
+source: https://www.programmersought.com/article/98291796437/
+
+    enum WB_PRESET
+    {
+        //Auto white balance 
+        AUTO,
+                 // cloudy day 7500k 
+        CLOUDY,
+                 //daylight 6500k  
+        DAYLIGHT,
+                 //White hot light 5000k  
+        INCANDESCENCE,
+                 // fluorescent lamp 4400k 
+        FLUORESCENT,
+                 //Tungsten lamp 2800k  
+        TUNGSTEN,
+    };
+	
+	
+	
+        void GrayWorld(Image<Bgr, Byte> img, WB_PRESET preset)
+        {
+            int avgR = 0, avgG = 0, avgB = 0;
+            int sumR = 0, sumG = 0, sumB = 0;
+            for (int h = 0; h < img.Height; ++h)
+            {
+                for (int w = 0; w < img.Width; ++w)
+                {
+                    sumB += img.Data[h, w, 0];
+                    sumG += img.Data[h, w, 1];
+                    sumR += img.Data[h, w, 2];
+                }
+            }
+            int size = img.Height * img.Width;
+            avgB = sumB / size;
+            avgG = sumG / size;
+            avgR = sumR / size;
+            //double k = (avgB + avgG + avgR) / 3;
+            double k = 0.299 * avgR + 0.587 * avgG + 0.114 * avgB;
+ 
+            switch (preset)
+            {
+                case WB_PRESET.AUTO:
+                    avgR = (sumR / size);
+                    avgG = (sumG / size);
+                    avgB = (sumB / size);
+                    break;
+                case WB_PRESET.CLOUDY:
+                    avgR = (int)(sumR * 1.953125 / size);
+                    avgG = (int)(sumG * 1.0390625 / size);
+                    avgB = (int)(sumB / size);
+                    break;
+                case WB_PRESET.DAYLIGHT:
+                    avgR = (int)(sumR * 1.2734375 / size);
+                    avgG = (int)(sumG / size);
+                    avgB = (int)(sumB * 1.0625 / size);
+                    break;
+                case WB_PRESET.INCANDESCENCE:
+                    avgR = (int)(sumR * 1.2890625 / size);
+                    avgG = (int)(sumG / size);
+                    avgB = (int)(sumB * 1.0625 / size);
+                    break;
+                case WB_PRESET.FLUORESCENT:
+                    avgR = (int)(sumR * 1.1875 / size);
+                    avgG = (int)(sumG / size);
+                    avgB = (int)(sumB * 1.3125 / size);
+                    break;
+                case WB_PRESET.TUNGSTEN:
+                    avgR = (int)(sumR / size);
+                    avgG = (int)(sumG * 1.0078125 / size);
+                    avgB = (int)(sumB * 1.28125 / size);
+                    break;
+                default:
+                    break;
+            }
+ 
+            double kr = k / avgR;
+            double kg = k / avgG;
+            double kb = k / avgB;
+            double newB, newG, newR;
+            for (int h = 0; h < img.Height; ++h)
+            {
+                for (int w = 0; w < img.Width; ++w)
+                {
+                    newB = img.Data[h, w, 0] * kb;
+                    newG = img.Data[h, w, 1] * kg;
+                    newR = img.Data[h, w, 2] * kr;
+ 
+                    img.Data[h, w, 0] = (byte)(newB > 255 ? 255 : newB);
+                    img.Data[h, w, 1] = (byte)(newG > 255 ? 255 : newG);
+                    img.Data[h, w, 2] = (byte)(newR > 255 ? 255 : newR);
+                }
+            }
+ 
+        }	
+		
+		
+-------------------------------
+source: https://www.programmersought.com/article/45576076526/
+
+#include <highgui/highgui.hpp>
+#include <imgproc/imgproc.hpp>
+ 
+using namespace cv;
+ 
+int main()
+{
+	Mat imageSource = imread("02.jpg");
+	imshow("original image", imageSource);
+	vector<Mat> imageRGB;
+ 
+	 //RGB three-channel separation
+	split(imageSource, imageRGB);
+ 
+	 //Find the mean value of the RGB components of the original image
+	double R, G, B;
+	B = mean(imageRGB[0])[0];
+	G = mean(imageRGB[1])[0];
+	R = mean(imageRGB[2])[0];
+ 
+	 //The gain of the RGB component that needs to be adjusted
+	double KR, KG, KB;
+	KB = (R + G + B) / (3 * B);
+	KG = (R + G + B) / (3 * G);
+	KR = (R + G + B) / (3 * R);
+ 
+	 //Adjust the respective values ​​of the three RGB channels
+	imageRGB[0] = imageRGB[0] * KB;
+	imageRGB[1] = imageRGB[1] * KG;
+	imageRGB[2] = imageRGB[2] * KR;
+ 
+	 //RGB three-channel image merge
+	merge(imageRGB, imageSource);
+	 imshow("White balance adjustment", imageSource);
+	waitKey();
+	return 0;
+}		
+		
+		
