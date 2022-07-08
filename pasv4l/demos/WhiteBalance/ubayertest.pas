@@ -166,7 +166,8 @@ var
   p: PBGRAPixel;
   pavg: TBGRAPixel;
   size:integer;
-  k:double;
+  k,kf :double;
+  k1, k2:word;
   newB, newG, newR: double;
   x: integer;
   kb,kg,kr: double;
@@ -174,7 +175,10 @@ begin
   if preset = wbpNONE then
     exit;
   pavg:= img.AveragePixel;
+  k1:= pavg.Lightness;
+  k2 := k1 shr 8;
   k := 0.299 * pavg.red + 0.587 * pavg.green + 0.114 * pavg.blue;
+  kf:= k1 / k;
   case preset of
     wbpCLOUDY: begin             // cloudy day 7500k
       kr:= k / pavg.red   * 1.953125;
@@ -421,7 +425,7 @@ begin
           2: img.InplaceNormalize(true);
         end;
         if (ComboBox1.ItemIndex >= 0) then
-          GrayWorld2(img,TWBPreset(ComboBox1.ItemIndex));
+          GrayWorld(img,TWBPreset(ComboBox1.ItemIndex));
         tmp := TBGRABitmap.create;
         BGRAreplace (tmp, img.Resample(Image2.width,image2.height));
         tmp.draw (Image2.Canvas,0,0);
